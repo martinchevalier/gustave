@@ -1,3 +1,6 @@
+# 1.0.1
+- New maintainer
+
 # 1.0.0
 
 - The package is considered stable enough to be used in production
