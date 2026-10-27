@@ -673,11 +673,10 @@ var_wolter <- function(y = NULL, old_strata, new_strata, pik, psu_id = NULL,
                 "old_strata" = old_strata, "new_strata" = new_strata, 
                 "diago" = diago))
   } else {
-    y <- stats::setNames(as.vector(y), rownames(y))
     
-    if(is.null(names(y))){
+    if(is.null(rownames(y))){
       warning("y is a unnamed matrix : old_strata names vector is used instead.")
-      names(y) <- names(old_strata)
+      rownames(y) <- rownames(old_strata)
     }
     
     if(!is.null(precalc) && !is.null(id) && !is.null(rownames(y)) && !identical(as.character(id), rownames(y))) stop(
@@ -687,23 +686,23 @@ var_wolter <- function(y = NULL, old_strata, new_strata, pik, psu_id = NULL,
     #Variance from Wolter
     wolter_names <- names(new_strata)[!is.na(new_strata)]
     if(!is.null(w)){
-      y_wolter <- y[wolter_names]*sqrt(w[wolter_names])
+      y_wolter <- y[wolter_names, , drop = FALSE]*sqrt(w[wolter_names])
     } else {
-      y_wolter <- y[wolter_names]
+      y_wolter <- y[wolter_names, , drop = FALSE]
     }
     
     tot_old_strat <- sum_by(y_wolter/pik[wolter_names], old_strata[wolter_names])
     tot_new_strat <- sum_by(y_wolter/pik[wolter_names], new_strata[wolter_names])
-    tot_old <- tot_old_strat[old_strata[wolter_names]]
-    mean_new <- tot_new_strat[new_strata[wolter_names]]/Hp[new_strata[wolter_names]]
+    tot_old <- tot_old_strat[old_strata[wolter_names], , drop = FALSE]
+    mean_new <- tot_new_strat[new_strata[wolter_names], , drop = FALSE]/Hp[new_strata[wolter_names]]
     
-    part_var_wolter <- sum((Hp[new_strata[wolter_names]]/(Hp[new_strata[wolter_names]] - 1))*(tot_old - mean_new)^2)
+    part_var_wolter <- colSums((Hp[new_strata[wolter_names]]/(Hp[new_strata[wolter_names]] - 1))*(tot_old - mean_new)^2)
     
     #Variance from SRSWOR
-    y_srs <- y[setdiff(names(y), wolter_names)]
-    part_var_srs <- var_srs(y_srs, precalc = part_srs, id = names(y_srs), w = w[setdiff(names(y), wolter_names)])
+    y_srs <- y[setdiff(rownames(y), wolter_names), , drop = FALSE]
+    part_var_srs <- var_srs(y_srs, precalc = part_srs, id = rownames(y_srs), w = w[setdiff(rownames(y), wolter_names)])
     
-    return(sum(part_var_wolter,part_var_srs, na.rm = TRUE))
+    return(colSums(rbind(part_var_wolter,part_var_srs), na.rm = TRUE))
   }
 }
 

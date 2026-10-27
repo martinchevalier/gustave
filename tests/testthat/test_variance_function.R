@@ -190,6 +190,13 @@ test_that("var_Wolter works", {
   
   
   testthat::expect_equal(var_srs_part + var_wolter_part, var_from_wolter_fn)
+  
+  # Also works when y is a matrix
+  y2 <- cbind(y, y)
+  testthat::expect_no_error(var_from_wolter_fn2 <- var_wolter(y = y2, precalc = precalc_var, id))
+  testthat::expect_equal(var_srs_part + var_wolter_part, var_from_wolter_fn2[1])
+  testthat::expect_equal(var_srs_part + var_wolter_part, var_from_wolter_fn2[2])
+
 })
 
 
